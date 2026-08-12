@@ -83,11 +83,7 @@ function HeroBooks({ books }) {
           <span>Preparing the shelves...</span>
         </div>
       )}
-      {books.length > 3 && (
-        <div className="hero-book-caption" aria-live="polite">
-          New books every 10 seconds · move your cursor over a cover
-        </div>
-      )}
+      
     </div>
   );
 }
