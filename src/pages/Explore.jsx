@@ -80,7 +80,7 @@ export default function Explore() {
         <section className="page-intro explore-intro">
           <span className="eyebrow">Explore</span>
           <h1>Find something worth reading.</h1>
-          <p>Search the catalog or move through a subject and let the next book find you.</p>
+          <p>Search for something new, explore a subject, and let the next book find you.</p>
           <SearchBar value={query} onChange={setQuery} onSubmit={handleSubmit} />
         </section>
 
