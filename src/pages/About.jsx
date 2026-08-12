@@ -26,9 +26,9 @@ export default function About() {
           <span className="eyebrow"><BookOpen size={14} /> About Book Explorer</span>
           <h1>A library designed for curiosity.</h1>
           <p>
-            Book Explorer is a spatial reading-discovery experience that turns the Open Library catalog
-            into a calmer place to browse. It is built for the moment before a reader knows exactly what
-            they want — when a title, subject, or unexpected cover is enough to start looking.
+            Book Explorer is a digital library made for discovering books at your own pace.
+             It’s for those moments when you don’t know exactly what you’re looking for, 
+             giving you space to browse, explore different subjects, and discover something new.
           </p>
         </section>
 
@@ -37,15 +37,15 @@ export default function About() {
             <span className="eyebrow"><Layers3 size={14} /> What is Book Explorer?</span>
           </div>
           <div className="about-introduction-copy">
-            <h2>Books are more than records.</h2>
+            <h2>A digital library made for discovery.</h2>
             <p>
-              Traditional search interfaces are excellent at returning information, but discovery can feel
-              like work. Book Explorer gives books a little more room: covers become visual anchors, shelves
-              become pathways, and details appear when a reader chooses to look closer.
+              Book Explorer is a digital library designed to make finding books feel more natural. 
+              Instead of treating books as simple search results, it gives you a more visual way to 
+              browse with covers, subjects, shelves, and details that help you decide what to explore next.
             </p>
             <p>
-              The result is a digital library that combines real catalog data with an editorial, spatial
-              interface — quiet enough to focus, expressive enough to invite exploration.
+              The experience combines real book data with a clean and thoughtful interface, creating a comfortable
+               place to search, browse, save favorites, and discover something new at your own pace.
             </p>
           </div>
         </section>
