@@ -33,7 +33,7 @@ export default function App() {
       <footer className="site-footer">
         <div className="container-fluid spatial-container">
           <span>Book Explorer</span>
-          <span>Powered by Open Library</span>
+          <span>Karloz Open Library</span>
         </div>
       </footer>
     </div>

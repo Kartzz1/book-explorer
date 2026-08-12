@@ -121,15 +121,15 @@ export default function Home() {
         <div className="hero-ambient hero-ambient-two" aria-hidden="true" />
         <div className="container-fluid spatial-container hero-grid">
           <div className="hero-copy">
-            <div className="hero-kicker"><Sparkles size={14} /> A spatial digital library</div>
-            <h1>Discover your next <em>great read.</em></h1>
+            <div className="hero-kicker"><Sparkles size={14} /> A digital library</div>
+            <h1>Somewhere in here, <em>your next story is waiting.</em></h1>
             <p>
-              Stories, ideas, and worlds waiting to be explored — drawn live from the Open Library catalog.
+              Stories, ideas, and worlds waiting to be explored — you never know what might catch your attention.
             </p>
             <SearchBar value={heroQuery} onChange={setHeroQuery} onSubmit={submitHeroSearch} />
             <div className="hero-note">
               <Compass size={15} />
-              Search titles, authors, subjects, and keywords.
+              Search by title, author, subject — or just type what’s on your mind.
             </div>
           </div>
 
@@ -186,7 +186,7 @@ export default function Home() {
           <div>
             <span className="eyebrow">The shelves continue</span>
             <h2>There is more to discover.</h2>
-            <p>Move beyond the curated shelves and search the wider Open Library catalog.</p>
+            <p>The shelves are just the beginning, there’s plenty more waiting to be explored.</p>
           </div>
           <Link className="primary-action" to="/explore">
             Explore More <ArrowRight size={17} />
