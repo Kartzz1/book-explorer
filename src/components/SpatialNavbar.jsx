@@ -1,6 +1,7 @@
 import { BookOpen, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+
 import ThemeSwitcher from "./ThemeSwitcher";
 
 const links = [
@@ -13,11 +14,24 @@ const links = [
 export default function SpatialNavbar() {
   const [open, setOpen] = useState(false);
 
+  // Toggle the mobile navigation menu.
+  function handleMenuToggle() {
+    setOpen((current) => !current);
+  }
+
+  // Close the mobile menu after navigation.
+  function closeMenu() {
+    setOpen(false);
+  }
+
   return (
     <header className="spatial-nav-wrap">
       <nav className="spatial-navbar" aria-label="Primary navigation">
-        <NavLink to="/" className="brand" onClick={() => setOpen(false)}>
-          <span className="brand-mark" aria-hidden="true"><BookOpen size={18} /></span>
+        <NavLink to="/" className="brand" onClick={closeMenu}>
+          <span className="brand-mark" aria-hidden="true">
+            <BookOpen size={18} />
+          </span>
+
           <span>Book Explorer</span>
         </NavLink>
 
@@ -26,23 +40,34 @@ export default function SpatialNavbar() {
           type="button"
           aria-label={open ? "Close navigation" : "Open navigation"}
           aria-expanded={open}
-          onClick={() => setOpen((value) => !value)}
+          aria-controls="primary-navigation"
+          onClick={handleMenuToggle}
         >
-          {open ? <X size={20} /> : <Menu size={20} />}
+          {open ? (
+            <X size={20} aria-hidden="true" />
+          ) : (
+            <Menu size={20} aria-hidden="true" />
+          )}
         </button>
 
-        <div className={`nav-links ${open ? "is-open" : ""}`}>
-          {links.map((link) => (
+        <div
+          id="primary-navigation"
+          className={`nav-links${open ? " is-open" : ""}`}
+        >
+          {links.map(({ to, label }) => (
             <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === "/"}
-              className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
-              onClick={() => setOpen(false)}
+              key={to}
+              to={to}
+              end={to === "/"}
+              className={({ isActive }) =>
+                `nav-link${isActive ? " active" : ""}`
+              }
+              onClick={closeMenu}
             >
-              {link.label}
+              {label}
             </NavLink>
           ))}
+
           <ThemeSwitcher />
         </div>
       </nav>
