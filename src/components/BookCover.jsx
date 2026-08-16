@@ -1,13 +1,31 @@
-import { BookOpen } from "lucide-react";
 import { useState } from "react";
+import { BookOpen } from "lucide-react";
 
-export default function BookCover({ book, className = "", priority = false }) {
-  const [failed, setFailed] = useState(false);
-  const src = book?.coverLargeUrl || book?.coverUrl || null;
+function BookCover({
+  book,
+  className = "",
+  priority = false,
+}) {
+  const [hasError, setHasError] = useState(false);
 
-  if (!src || failed) {
+  const title = book?.title || "book";
+  const coverSource =
+    book?.coverLargeUrl ||
+    book?.coverUrl ||
+    null;
+
+  const classNames = className
+    ? `book-cover-image ${className}`
+    : "book-cover-image";
+
+  // Show a fallback when the book has no cover or the image fails to load.
+  if (!coverSource || hasError) {
     return (
-      <div className={`book-cover-fallback ${className}`} role="img" aria-label={`Cover unavailable for ${book?.title || "book"}`}>
+      <div
+        className={`book-cover-fallback ${className}`}
+        role="img"
+        aria-label={`Cover unavailable for ${title}`}
+      >
         <BookOpen size={34} />
         <span>Cover unavailable</span>
       </div>
@@ -16,11 +34,13 @@ export default function BookCover({ book, className = "", priority = false }) {
 
   return (
     <img
-      className={`book-cover-image ${className}`}
-      src={src}
-      alt={`Cover of ${book?.title || "book"}`}
+      className={classNames}
+      src={coverSource}
+      alt={`Cover of ${title}`}
       loading={priority ? "eager" : "lazy"}
-      onError={() => setFailed(true)}
+      onError={() => setHasError(true)}
     />
   );
 }
+
+export default BookCover;
