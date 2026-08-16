@@ -1,5 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
-import { getBooksByCategory, getMixedBooks, searchBooks } from "../services/openLibraryApi";
+import {
+  getBooksByCategory,
+  getMixedBooks,
+  searchBooks,
+} from "../services/openLibraryApi";
+
+const HOME_SHELVES = [
+  {
+    key: "philosophy",
+    query: "subject:philosophy",
+  },
+  {
+    key: "self",
+    query:
+      'subject:"self help" OR subject:psychology OR subject:identity OR subject:"personal growth"',
+  },
+  {
+    key: "stories",
+    query:
+      "subject:fiction OR subject:literature OR subject:mystery OR subject:fantasy",
+  },
+  {
+    key: "thinking",
+    query:
+      "subject:science OR subject:technology OR subject:history OR subject:knowledge",
+  },
+];
+
+const EMPTY_SHELVES = {
+  philosophy: [],
+  self: [],
+  stories: [],
+  thinking: [],
+};
+
+const wait = (ms) =>
+  new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export function useBooks(initialQuery = "") {
   const [query, setQuery] = useState(initialQuery);
@@ -8,9 +44,9 @@ export function useBooks(initialQuery = "") {
   const [error, setError] = useState("");
 
   const search = useCallback(async (nextQuery = "") => {
-    const trimmed = nextQuery.trim();
+    const trimmedQuery = nextQuery.trim();
 
-    if (!trimmed) {
+    if (!trimmedQuery) {
       setBooks([]);
       setError("");
       setLoading(false);
@@ -21,18 +57,28 @@ export function useBooks(initialQuery = "") {
     setError("");
 
     try {
-      const results = await searchBooks(trimmed);
+      const results = await searchBooks(trimmedQuery);
       setBooks(results);
     } catch (requestError) {
       console.error("Book search failed:", requestError);
       setBooks([]);
-      setError("The library could not be reached right now. Check your connection and try again.");
+      setError(
+        "The library could not be reached right now. Check your connection and try again."
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
-  return { query, setQuery, books, setBooks, loading, error, search };
+  return {
+    query,
+    setQuery,
+    books,
+    setBooks,
+    loading,
+    error,
+    search,
+  };
 }
 
 export function useCategoryBooks(category, limit = 10) {
@@ -51,39 +97,51 @@ export function useCategoryBooks(category, limit = 10) {
 
     let active = true;
 
-    async function load() {
+    const loadCategory = async () => {
       setLoading(true);
       setError("");
 
       try {
         const results = await getBooksByCategory(category, limit);
-        if (active) setBooks(results);
+
+        if (active) {
+          setBooks(results);
+        }
       } catch (requestError) {
         console.error("Category load failed:", requestError);
+
         if (active) {
           setBooks([]);
           setError("This collection could not be loaded right now.");
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
-    load();
-    return () => { active = false; };
+    loadCategory();
+
+    return () => {
+      active = false;
+    };
   }, [category, limit, reloadToken]);
 
-  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
-  return { books, loading, error, reload };
+  const reload = useCallback(() => {
+    setReloadToken((current) => current + 1);
+  }, []);
+
+  return {
+    books,
+    loading,
+    error,
+    reload,
+  };
 }
 
 export function useHomeShelves(limit = 30) {
-  const [shelves, setShelves] = useState({
-    philosophy: [],
-    self: [],
-    stories: [],
-    thinking: [],
-  });
+  const [shelves, setShelves] = useState(EMPTY_SHELVES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
@@ -91,66 +149,71 @@ export function useHomeShelves(limit = 30) {
   useEffect(() => {
     let active = true;
 
-    async function load() {
+    const loadShelves = async () => {
       setLoading(true);
       setError("");
 
-      const definitions = [
-        ["philosophy", "subject:philosophy"],
-        ["self", 'subject:"self help" OR subject:psychology OR subject:identity OR subject:"personal growth"'],
-        ["stories", "subject:fiction OR subject:literature OR subject:mystery OR subject:fantasy"],
-        ["thinking", "subject:science OR subject:technology OR subject:history OR subject:knowledge"],
-      ];
+      const loadedShelves = {};
+      let successfulShelves = 0;
 
-      const next = {};
-      let successful = 0;
+      for (let index = 0; index < HOME_SHELVES.length; index += 1) {
+        const { key, query } = HOME_SHELVES[index];
 
-      try {
-        // Load shelves one at a time. This intentionally avoids firing four
-        // catalog requests simultaneously and is friendlier to Open Library.
-        for (let index = 0; index < definitions.length; index += 1) {
-          const [key, query] = definitions[index];
-          try {
-            next[key] = await searchBooks(query, { limit });
-            if (next[key].length) successful += 1;
-          } catch (requestError) {
-            console.error(`Home shelf failed (${key}):`, requestError);
-            next[key] = [];
+        try {
+          loadedShelves[key] = await searchBooks(query, { limit });
+
+          if (loadedShelves[key].length > 0) {
+            successfulShelves += 1;
           }
-
-          if (index < definitions.length - 1) {
-            await new Promise((resolve) => window.setTimeout(resolve, 1050));
-          }
+        } catch (requestError) {
+          console.error(`Home shelf failed (${key}):`, requestError);
+          loadedShelves[key] = [];
         }
 
-        if (!active) return;
-
-        setShelves({
-          philosophy: next.philosophy || [],
-          self: next.self || [],
-          stories: next.stories || [],
-          thinking: next.thinking || [],
-        });
-
-        if (!successful) {
-          setError("The library is temporarily unavailable. Please try again.");
+        // Leave a short gap between catalog requests.
+        if (index < HOME_SHELVES.length - 1) {
+          await wait(1050);
         }
-      } catch (requestError) {
-        console.error("Home library failed:", requestError);
-        if (active) setError("The library is temporarily unavailable. Please try again.");
-      } finally {
-        if (active) setLoading(false);
       }
-    }
 
-    load();
-    return () => { active = false; };
+      if (!active) return;
+
+      setShelves({
+        philosophy: loadedShelves.philosophy || [],
+        self: loadedShelves.self || [],
+        stories: loadedShelves.stories || [],
+        thinking: loadedShelves.thinking || [],
+      });
+
+      if (!successfulShelves) {
+        setError(
+          "The library is temporarily unavailable. Please try again."
+        );
+      }
+
+      setLoading(false);
+    };
+
+    loadShelves();
+
+    return () => {
+      active = false;
+    };
   }, [limit, reloadToken]);
 
-  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
+  const reload = useCallback(() => {
+    setReloadToken((current) => current + 1);
+  }, []);
+
   const books = Object.values(shelves).flat();
 
-  return { shelves, books, loading, error, reload };
+  return {
+    shelves,
+    books,
+    loading,
+    error,
+    reload,
+  };
 }
 
 export function useMixedBooks(limit = 30) {
@@ -162,28 +225,47 @@ export function useMixedBooks(limit = 30) {
   useEffect(() => {
     let active = true;
 
-    async function load() {
+    const loadBooks = async () => {
       setLoading(true);
       setError("");
 
       try {
         const results = await getMixedBooks(limit);
-        if (active) setBooks(results);
+
+        if (active) {
+          setBooks(results);
+        }
       } catch (requestError) {
         console.error("Mixed library load failed:", requestError);
+
         if (active) {
           setBooks([]);
-          setError("The library could not be loaded right now. Please try again.");
+          setError(
+            "The library could not be loaded right now. Please try again."
+          );
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
-    load();
-    return () => { active = false; };
+    loadBooks();
+
+    return () => {
+      active = false;
+    };
   }, [limit, reloadToken]);
 
-  const reload = useCallback(() => setReloadToken((value) => value + 1), []);
-  return { books, loading, error, reload };
+  const reload = useCallback(() => {
+    setReloadToken((current) => current + 1);
+  }, []);
+
+  return {
+    books,
+    loading,
+    error,
+    reload,
+  };
 }
