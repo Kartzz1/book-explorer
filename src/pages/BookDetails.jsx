@@ -18,6 +18,7 @@ import {
 import {
   getAuthorLabel,
   getDescription,
+  getLanguageLabel,
   getYearLabel,
 } from "../utils/bookHelpers";
 
@@ -199,9 +200,7 @@ export default function BookDetails() {
     {
       icon: Globe2,
       label: "Language",
-      value:
-        book.languages?.slice(0,4).join(", ") ||
-        "Unavailable",
+      value: getLanguageLabel(book.languages),
     },
     {
       icon: BookOpen,
