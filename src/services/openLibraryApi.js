@@ -428,6 +428,13 @@ export async function getEditionMetadata(id, limit = 5) {
         : null,
       numberOfPages: edition.number_of_pages || null,
       physicalFormat: edition.physical_format || null,
+
+      // Open Library returns the total number of editions in `size`.
+      editionCount:
+        typeof data?.size === "number"
+          ? data.size
+          : null,
+
       key: edition.key || null,
     };
   } catch (error) {

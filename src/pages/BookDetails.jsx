@@ -31,7 +31,7 @@ function createBookModel(details, searchRecord) {
     title: details.title,
     description: details.description,
 
-    // Prefer edition covers because they usually provide higher quality images.
+    // Uses the edition cover when available, with the work cover as a fallback.
     coverUrl: coverId
       ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
       : details.coverUrl,
@@ -52,7 +52,10 @@ function createBookModel(details, searchRecord) {
 
     subjects: details.subjects || [],
 
-    editionCount: searchRecord?.editionCount || 0,
+    editionCount:
+      searchRecord?.editionCount ??
+      details.edition?.editionCount ??
+      null,
 
     languages:
       details.edition?.languages ||
@@ -132,7 +135,7 @@ export default function BookDetails() {
 
     fetchBook();
 
-    // Prevents state updates after leaving the page.
+    // Stops this page from updating state after the book has changed or the page is left.
     return () => {
       ignore = true;
     };
@@ -195,7 +198,10 @@ export default function BookDetails() {
     {
       icon: Layers3,
       label: "Edition count",
-      value: book.editionCount || "Unavailable",
+      value:
+        typeof book.editionCount === "number"
+          ? book.editionCount
+          : "Unavailable",
     },
     {
       icon: Globe2,
